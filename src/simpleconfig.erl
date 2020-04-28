@@ -5,7 +5,7 @@
 -export([handle_call/3, handle_cast/2, handle_info/2,
 	 init/1, terminate/2, code_change/3]).
 
--export([start_link/0, stop/0]).
+-export([start_link/1, stop/0]).
 
 -export([lookup/2, lookup/1, update/1]).
 
@@ -21,26 +21,28 @@ lookup(Key) ->
 update(Filename) ->
     gen_server:call(?MODULE, {update, Filename}).
 
-start_link() ->
-    gen_server:start_link({local, ?SERVER}, ?MODULE, [], []).
+start_link(CommonTab) ->
+    gen_server:start_link({local, ?SERVER}, ?MODULE, CommonTab, []).
 
 stop() ->
     gen_server:call(?MODULE, stop).
 
 
-handle_call({update, Filename}, _From, State) ->
+handle_call({update, Filename}, _From, {CommonTab, _} = State) ->
     case file:consult(Filename) of
-	{ok, Configuration} ->
-	    {reply, ok, maps:from_list(Configuration)};
+	{ok, RawConfig} ->
+	    Configuration = maps:from_list(RawConfig),
+	    ets:insert(CommonTab, {top_state, Configuration}),
+	    {reply, ok, {CommonTab, Configuration}};
 	{error, Reason} ->
 	    {reply, {error, Reason}, State}
     end;
 
-handle_call({lookup, Key, Default}, _From, State) ->
-    {reply, maps:get(Key, State, Default), State};
+handle_call({lookup, Key, Default}, _From, {_, Config} = State) ->
+    {reply, maps:get(Key, Config, Default), State};
 
-handle_call({lookup, Key}, _From, State) ->
-    {reply, maps:get(Key, State), State};
+handle_call({lookup, Key}, _From, {_, Config} = State) ->
+    {reply, maps:get(Key, Config), State};
 
 handle_call(stop, _From, State) ->
     {stop, normal, stopped, State}.
@@ -52,8 +54,13 @@ handle_info(_Info, State) ->
     {noreply, State}.
 
 
-init([]) ->
-    {ok, #{}}.
+init(CommonTab) ->
+    case ets:lookup(CommonTab, top_state) of
+	[{top_state, Config}] ->
+	    {ok, {CommonTab, Config}};
+	_ ->
+	    {ok, {CommonTab, #{}}}
+    end.
 
 terminate(_Reason, _State) ->
     ok.

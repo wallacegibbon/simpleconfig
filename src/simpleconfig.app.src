@@ -1,10 +1,13 @@
 {application, simpleconfig,
  [{description, "A library for fetching text configs"},
   {vsn, "0.1.0"},
-  {registered, []},
+  {modules, [simpleconfig_app, simpleconfig_sup, simpleconfig]},
+  {registered, [simpleconfig]},
+
   {applications, [kernel, stdlib]},
-  {env,[]},
-  {modules, []},
+  {mod, {simpleconfig_app, []}},
+
   {licenses, ["Apache 2.0"]},
+  {env,[]},
   {links, []}
  ]}.
