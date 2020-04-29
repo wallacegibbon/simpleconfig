@@ -13,8 +13,7 @@ child_specs(CommonTab) ->
       10000, worker, [simpleconfig]}].
 
 init(CommonTab) ->
-    SupFlags = #{strategy => one_for_all, intensity => 3, period => 3},
-    {ok, {SupFlags, child_specs(CommonTab)}}.
+    {ok, {{one_for_one, 3, 3}, child_specs(CommonTab)}}.
 
 start_link() ->
     CommonTab = ets:new(simpleconfig, [set, public]),
