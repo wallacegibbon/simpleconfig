@@ -14,7 +14,7 @@
 update(Filename) when is_list(Filename); is_binary(Filename) ->
     gen_server:call(?MODULE, {update, Filename});
 update(default) ->
-    gen_server:call(?MODULE, {update, default_cfg()}).
+    gen_server:call(?MODULE, {update, default_cfgfile()}).
 
 lookup(Key, Default) ->
     gen_server:call(?MODULE, {lookup, Key, Default}).
@@ -28,13 +28,19 @@ start_link(CommonTab) ->
 stop() ->
     gen_server:call(?MODULE, stop).
 
-default_cfg() ->
+
+default_cfgfile() ->
     case os:getenv("DEVELOPMENT") of
-	false ->
-	    filename:join([code:root_dir(), "config", "params"]);
+	"true" ->
+	    config_file(develop);
 	_ ->
-	    filename:join(["config", "dev.config"])
+	    config_file(release)
     end.
+
+config_file(release) ->
+    filename:join([code:root_dir(), "config", "params"]);
+config_file(develop) ->
+    filename:join(["config", "dev.config"]).
 
 
 handle_call({update, Filename}, _From, {CommonTab, _} = State) ->
@@ -76,5 +82,4 @@ terminate(_Reason, _State) ->
 
 code_change(_OldVsn, State, _Extra) ->
     {ok, State}.
-
 
