@@ -9,9 +9,8 @@
 -define(SERVER, ?MODULE).
 
 child_specs(CommonTab) ->
-    [#{id => simpleconfig, start => {simpleconfig, start_link, [CommonTab]},
-       restart => permanent, shutdown => 10000, type => worker,
-       modules => [simpleconfig]}].
+    [{simpleconfig, {simpleconfig, start_link, [CommonTab]}, permanent,
+      10000, worker, [simpleconfig]}].
 
 init(CommonTab) ->
     SupFlags = #{strategy => one_for_all, intensity => 3, period => 3},
