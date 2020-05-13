@@ -8,12 +8,12 @@
 
 -define(SERVER, ?MODULE).
 
-child_specs(CommonTab) ->
+child_list(CommonTab) ->
     [{simpleconfig, {simpleconfig, start_link, [CommonTab]}, permanent,
       10000, worker, [simpleconfig]}].
 
 init(CommonTab) ->
-    {ok, {{one_for_one, 3, 3}, child_specs(CommonTab)}}.
+    {ok, {{one_for_one, 10, 10}, child_list(CommonTab)}}.
 
 start_link() ->
     CommonTab = ets:new(simpleconfig, [set, public]),

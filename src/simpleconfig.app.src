@@ -1,6 +1,6 @@
 {application, simpleconfig,
  [{description, "A library for fetching text configs"},
-  {vsn, "0.3.2"},
+  {vsn, "0.3.3"},
   {modules, [simpleconfig_app, simpleconfig_sup, simpleconfig]},
   {registered, [simpleconfig]},
 
